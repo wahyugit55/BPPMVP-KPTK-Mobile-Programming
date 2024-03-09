@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:resting/api_service.dart';
 import 'package:resting/user_model.dart';
+import 'package:resting/user_detail_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,8 +24,10 @@ class _MyAppState extends State<MyApp> {
   }
 
   void getData() async {
-    userModel = (await ApiService().getUsers())!;
-    Future.delayed(const Duration(seconds: 1)).then((value) => setState(() {}));
+    userModel = await ApiService().getUsers();
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -44,7 +47,7 @@ class _MyAppState extends State<MyApp> {
             ),
             onPressed: () {},
           ),
-        ), // AppBar
+        ),
         body: userModel == null || userModel!.isEmpty
             ? const Center(
                 child: CircularProgressIndicator(),
@@ -52,22 +55,28 @@ class _MyAppState extends State<MyApp> {
             : ListView.builder(
                 itemCount: userModel!.length,
                 itemBuilder: (context, index) {
-                  return Card(
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Text(userModel![index].name),
-                            Text(userModel![index].email),
-                          ],
-                        )
-                      ],
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.blue.shade100,
+                      child: const Icon(Icons.person, color: Colors.blue),
                     ),
+                    title: Text(userModel![index].name),
+                    subtitle: Text(userModel![index].email),
+                    onTap: () {
+                      // Navigasi ke halaman detail user
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                UserDetailPage(user: userModel![index])),
+                      );
+                    },
+                    contentPadding: EdgeInsets.symmetric(
+                        horizontal: 16.0), // Menyesuaikan jarak kiri dan kanan
                   );
                 },
               ),
-      ), // Scaffold
-    ); // MaterialApp
+      ),
+    );
   }
 }
